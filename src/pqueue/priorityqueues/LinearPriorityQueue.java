@@ -26,7 +26,7 @@ import java.util.*;
  *
  * @param <T> The type held by the container.
  *
- * @author  ---- YOUR NAME HERE ----
+ * @author  ---- Haoran Li ----
  *
  * @see MinHeapPriorityQueue
  * @see PriorityQueue
@@ -37,8 +37,18 @@ public class LinearPriorityQueue<T> implements PriorityQueue<T> {
 	/* ***********************************************************************************
 	 * Write any private data elements or private methods for LinearPriorityQueue here...*
 	 * ***********************************************************************************/
+	private ArrayList<Qnode> queue;
+	private int modify_counter = 0;
+	private int capacity;
 
-
+	private class Qnode{
+		T data;
+		int priority;
+		public Qnode(T data, int priority){
+			this.data = data;
+			this.priority = priority;
+		}
+	}
 
 
 
@@ -52,7 +62,8 @@ public class LinearPriorityQueue<T> implements PriorityQueue<T> {
 	 * underlying element structure that you will choose to use to implement this class.
 	 */
 	public LinearPriorityQueue(){
-		throw new UnimplementedMethodException();
+		this.queue = new ArrayList<>();
+		this.capacity = 20;
 	}
 
 	/**
@@ -64,38 +75,96 @@ public class LinearPriorityQueue<T> implements PriorityQueue<T> {
 	 * @throws InvalidCapacityException if the capacity provided is less than 1.
 	 */
 	public LinearPriorityQueue(int capacity) throws InvalidCapacityException{	// DO *NOT* ERASE THE "THROWS" DECLARATION!
-		throw new UnimplementedMethodException();
+		if (capacity < 1){
+			throw new InvalidCapacityException("Invalid Capacity");
+		}else{
+			queue = new ArrayList<>();
+			this.capacity = capacity;
+		}
+		
+		
 	}
 
 	@Override
 	public void enqueue(T element, int priority) throws InvalidPriorityException{	// DO *NOT* ERASE THE "THROWS" DECLARATION!
-		throw new UnimplementedMethodException();
+		if (priority <= 0){
+			throw new InvalidPriorityException("Invalid Priority Number");
+		}else{
+			modify_counter ++;
+			boolean added_flag = false;
+			if (queue.size() == 0){
+				queue.add(new Qnode(element, priority));
+			}else{
+				for(int i = 0;i < this.queue.size(); i++){
+					Qnode currNode = this.queue.get(i);
+					if (currNode.priority > priority){
+						queue.add(i, new Qnode(element, priority));
+						added_flag = true;
+						break;
+					}
+				}
+				if (added_flag == false){
+					queue.add(new Qnode(element, priority)); // if not added any element, add to the end of the queue 
+				}
+				
+			}	
+		}
 	}
 
 	@Override
 	public T dequeue() throws EmptyPriorityQueueException { 	// DO *NOT* ERASE THE "THROWS" DECLARATION!
-		throw new UnimplementedMethodException();
+		if (this.queue.size() == 0){
+			throw new EmptyPriorityQueueException("Empty Queue");
+		}else{
+			modify_counter ++;
+			T ret_val = queue.get(0).data;
+			queue.remove(0);
+			return ret_val;
+		}
 	}
 
 	@Override
 	public T getFirst() throws EmptyPriorityQueueException {	// DO *NOT* ERASE THE "THROWS" DECLARATION!
-		throw new UnimplementedMethodException();
+		if (this.queue.size() == 0){
+			throw new EmptyPriorityQueueException("Empty Queue");
+		}else{
+			return queue.get(0).data;
+		}
 	}
 
 	@Override
 	public int size() {
-		throw new UnimplementedMethodException();
+		return queue.size();
 	}
 
 	@Override
 	public boolean isEmpty() {
-		throw new UnimplementedMethodException();
+		return (queue.size() == 0);
 	}
 
 
 	@Override
 	public Iterator<T> iterator() {
-		throw new UnimplementedMethodException();
+		return new LinearPQInterator();
 	}
 
+	private class LinearPQInterator implements Iterator<T>{
+		private ArrayList<Qnode> currQueue = queue;
+		private int i = 0;
+		private	int curr_mod = modify_counter;
+		@Override
+		public T next() throws ConcurrentModificationException{
+			if (curr_mod != modify_counter){
+				throw new ConcurrentModificationException();
+			}
+			T ret_val = currQueue.get(i).data;
+			i++;
+			return ret_val;
+		}
+
+		@Override
+		public boolean hasNext(){
+			return (i < currQueue.size());
+		}
+	}
 }
